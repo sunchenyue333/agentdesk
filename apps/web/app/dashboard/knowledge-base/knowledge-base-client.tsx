@@ -221,6 +221,9 @@ export function KnowledgeBaseClient() {
                   </Link>
                   <Badge tone="blue">{result.score.toFixed(3)}</Badge>
                 </div>
+                {result.heading ? (
+                  <p className="mt-1 text-xs font-medium text-foreground">{result.heading}</p>
+                ) : null}
                 <p className="mt-2 line-clamp-4 text-sm leading-6 text-muted-foreground">
                   {result.content}
                 </p>

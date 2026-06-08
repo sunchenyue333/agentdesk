@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.document import DocumentStatus
 
@@ -39,13 +39,15 @@ class DocumentChunkRead(BaseModel):
 
 class KnowledgeSearchRequest(BaseModel):
     query: str
-    top_k: int = 5
+    top_k: int = 3
 
 
 class KnowledgeSearchChunk(BaseModel):
     chunk_id: UUID
     document_id: UUID
     document_title: str
+    heading: str | None = None
+    heading_path: list[str] = Field(default_factory=list)
     content: str
     score: float
 
@@ -53,4 +55,3 @@ class KnowledgeSearchChunk(BaseModel):
 class KnowledgeSearchResponse(BaseModel):
     query: str
     chunks: list[KnowledgeSearchChunk]
-

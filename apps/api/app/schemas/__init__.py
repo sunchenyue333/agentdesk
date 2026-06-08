@@ -17,7 +17,7 @@ from app.schemas.ticket import (
     TicketRead,
     TicketUpdate,
 )
-from app.schemas.chat import ChatCitation, ChatRequest, ChatResponse, ChatStep, ChatToolCall
+from app.schemas.chat import ChatCitation, ChatRequest, ChatResponse, ChatRetrievedChunk, ChatStep, ChatToolCall
 from app.schemas.approval import (
     ApprovalActionResponse,
     ApprovalAgentRunRead,
@@ -45,6 +45,7 @@ __all__ = [
     "ChatCitation",
     "ChatRequest",
     "ChatResponse",
+    "ChatRetrievedChunk",
     "ChatStep",
     "ChatToolCall",
     "ApprovalActionResponse",

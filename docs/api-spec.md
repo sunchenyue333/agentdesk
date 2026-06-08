@@ -138,7 +138,9 @@ Request:
 
 ### `POST /workspaces/{workspace_id}/chat`
 
-Runs the Phase 5 LangGraph support agent for a workspace. The agent classifies intent, retrieves knowledge-base context, drafts an answer, prepares tool calls when needed, marks risky responses for human review, and persists an agent run trace.
+Runs the LangGraph support agent for a workspace. The agent classifies intent, retrieves knowledge-base context, drafts an answer, prepares tool calls when needed, marks risky responses for human review, and persists an agent run trace.
+
+If `OPENAI_API_KEY` is not configured, the response is explicitly marked as `answer_mode: "mock"` and uses deterministic demo answer generation. Mock mode does not concatenate raw chunks; it filters retrieved evidence to sentences directly related to the user question.
 
 Request:
 
@@ -158,16 +160,30 @@ Response:
       "document_id": "uuid",
       "document_title": "Refund Policy",
       "chunk_id": "uuid",
+      "heading": "Billing SOP > Refund Policy",
       "quote": "Relevant source excerpt"
     }
   ],
   "confidence": "medium",
   "needs_human_review": true,
+  "answer_mode": "mock",
   "agent_run_id": "uuid",
-  "steps": [
+  "structured_steps": [
+    "判断意图：密码重置问题",
+    "检索知识库：找到账户设置相关资料",
+    "生成回答：基于密码重置 SOP",
+    "风险等级：低",
+    "不需要人工审批"
+  ],
+  "retrieved_chunks": [
     {
-      "title": "Intent classified",
-      "detail": "knowledge_question"
+      "chunk_id": "uuid",
+      "document_id": "uuid",
+      "document_title": "Login SOP",
+      "heading": "登录与密码问题处理 SOP > 用户忘记密码",
+      "heading_path": ["登录与密码问题处理 SOP", "用户忘记密码"],
+      "content": "Relevant chunk text",
+      "score": 12.7
     }
   ],
   "tool_calls": [

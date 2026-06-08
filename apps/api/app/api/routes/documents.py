@@ -91,6 +91,8 @@ def search_knowledge(workspace_id: UUID, request: KnowledgeSearchRequest, db: Se
             "chunk_id": chunk.id,
             "document_id": chunk.document_id,
             "document_title": document_title,
+            "heading": (chunk.metadata_ or {}).get("heading"),
+            "heading_path": (chunk.metadata_ or {}).get("heading_path", []),
             "content": chunk.content,
             "score": score,
         }

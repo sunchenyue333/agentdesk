@@ -6,6 +6,7 @@ class Citation(TypedDict):
     document_id: str
     document_title: str
     chunk_id: str
+    heading: str
     quote: str
 
 
@@ -29,6 +30,6 @@ class SupportAgentState(TypedDict, total=False):
     final_answer: str
     citations: list[Citation]
     confidence: str
+    answer_mode: str
     structured_steps: list[StructuredStep]
     error: str | None
-

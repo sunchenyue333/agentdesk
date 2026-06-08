@@ -44,6 +44,8 @@ export type KnowledgeSearchChunk = {
   chunk_id: string;
   document_id: string;
   document_title: string;
+  heading: string | null;
+  heading_path: string[];
   content: string;
   score: number;
 };
@@ -86,6 +88,7 @@ export type ChatCitation = {
   document_id: string;
   document_title: string;
   chunk_id: string;
+  heading: string;
   quote: string;
 };
 
@@ -101,13 +104,25 @@ export type ChatToolCall = {
   status: string;
 };
 
+export type ChatRetrievedChunk = {
+  chunk_id: string;
+  document_id: string;
+  document_title: string;
+  heading: string | null;
+  heading_path: string[];
+  content: string;
+  score: number;
+};
+
 export type ChatResponse = {
   answer: string;
   citations: ChatCitation[];
   confidence: "high" | "medium" | "low" | string;
   needs_human_review: boolean;
+  answer_mode: "mock" | "llm" | string;
   agent_run_id: string;
-  steps: ChatStep[];
+  structured_steps: string[];
+  retrieved_chunks: ChatRetrievedChunk[];
   tool_calls: ChatToolCall[];
   latency_ms: number | null;
 };

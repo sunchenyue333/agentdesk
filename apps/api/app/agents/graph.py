@@ -1,17 +1,19 @@
 from langgraph.graph import END, StateGraph
 from sqlalchemy.orm import Session
 
+from app.agents.answer_generation import generate_grounded_answer
 from app.agents.state import SupportAgentState
 from app.agents.tools import knowledge_search
+from app.core.config import settings
 from app.models.workspace import Workspace
 
-RISK_KEYWORDS = ("refund", "legal", "medical", "finance", "security", "privacy", "credit card")
-TICKET_KEYWORDS = ("ticket", "issue", "bug", "cannot", "can't", "error", "problem", "login")
+RISK_KEYWORDS = ("refund", "legal", "medical", "finance", "security", "privacy", "credit card", "退款")
+TICKET_KEYWORDS = ("ticket", "issue", "bug", "cannot", "can't", "error", "problem", "login", "工单")
 
 
 def classify_intent(state: SupportAgentState) -> SupportAgentState:
     message = state["user_message"].lower()
-    if any(keyword in message for keyword in ("refund", "pricing", "password", "security", "policy")):
+    if any(keyword in message for keyword in ("refund", "pricing", "password", "security", "policy", "密码", "退款", "安全", "政策")):
         intent = "knowledge_question"
     elif any(keyword in message for keyword in TICKET_KEYWORDS):
         intent = "support_ticket"
@@ -28,7 +30,7 @@ def classify_intent(state: SupportAgentState) -> SupportAgentState:
 
 def retrieve_context_factory(db: Session):
     def retrieve_context(state: SupportAgentState) -> SupportAgentState:
-        result = knowledge_search(db, state["workspace_id"], state["user_message"], top_k=5)
+        result = knowledge_search(db, state["workspace_id"], state["user_message"], top_k=3)
         steps = state.get("structured_steps", [])
         steps.append({"title": "Knowledge retrieved", "detail": f"Found {len(result['chunks'])} chunks"})
         return {**state, "retrieved_chunks": result["chunks"], "structured_steps": steps}
@@ -60,28 +62,13 @@ def decide_action(state: SupportAgentState) -> SupportAgentState:
 
 
 def generate_answer(state: SupportAgentState) -> SupportAgentState:
-    chunks = state.get("retrieved_chunks", [])
-    citations = [
-        {
-            "document_id": chunk["document_id"],
-            "document_title": chunk["document_title"],
-            "chunk_id": chunk["chunk_id"],
-            "quote": chunk["content"][:220],
-        }
-        for chunk in chunks[:3]
-    ]
-
-    if chunks:
-        evidence = "\n\n".join(chunk["content"][:700] for chunk in chunks[:3])
-        answer = (
-            "Based on the available support knowledge, here is the best answer:\n\n"
-            f"{summarize_from_context(state['user_message'], evidence)}\n\n"
-            "Sources are attached below."
-        )
-        confidence = "medium"
-    else:
-        answer = "I do not have enough knowledge base context to answer confidently. Please escalate this to a human."
-        confidence = "low"
+    result = generate_grounded_answer(
+        state["user_message"],
+        state.get("retrieved_chunks", []),
+        openai_api_key=settings.openai_api_key,
+    )
+    answer = result["answer"]
+    confidence = result["confidence"]
 
     steps = state.get("structured_steps", [])
     steps.append({"title": "Answer drafted", "detail": f"confidence={confidence}"})
@@ -89,8 +76,10 @@ def generate_answer(state: SupportAgentState) -> SupportAgentState:
         **state,
         "draft_answer": answer,
         "final_answer": answer,
-        "citations": citations,
+        "citations": result["citations"],
         "confidence": confidence,
+        "answer_mode": result["answer_mode"],
+        "retrieved_chunks": result["relevant_chunks"],
         "structured_steps": steps,
     }
 
@@ -128,29 +117,13 @@ def maybe_request_human_approval(state: SupportAgentState) -> SupportAgentState:
         return state
     steps = state.get("structured_steps", [])
     steps.append({"title": "Human approval requested", "detail": "high-risk or customer-facing action"})
-    final_answer = (
-        f"{state.get('final_answer', '')}\n\n"
-        "This response or proposed action should be reviewed by a human before sending to the customer."
-    )
-    return {**state, "final_answer": final_answer, "structured_steps": steps}
+    return {**state, "structured_steps": steps}
 
 
 def final_response(state: SupportAgentState) -> SupportAgentState:
     steps = state.get("structured_steps", [])
     steps.append({"title": "Final response ready", "detail": "structured trace saved"})
     return {**state, "structured_steps": steps}
-
-
-def summarize_from_context(question: str, evidence: str) -> str:
-    question_terms = {term.strip(".,?!:;").lower() for term in question.split() if len(term) > 3}
-    sentences = [sentence.strip() for sentence in evidence.replace("\n", " ").split(".") if sentence.strip()]
-    ranked = sorted(
-        sentences,
-        key=lambda sentence: sum(term in sentence.lower() for term in question_terms),
-        reverse=True,
-    )
-    selected = ranked[:3] or sentences[:2]
-    return ". ".join(selected).strip() + ("." if selected else "")
 
 
 def build_support_agent(db: Session, workspace: Workspace):
@@ -172,4 +145,3 @@ def build_support_agent(db: Session, workspace: Workspace):
     graph.add_edge("maybe_request_human_approval", "final_response")
     graph.add_edge("final_response", END)
     return graph.compile()
-

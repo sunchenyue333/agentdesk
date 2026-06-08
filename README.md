@@ -32,13 +32,16 @@ This repository currently implements Phase 1 through Phase 6:
 - Knowledge base document upload
 - PDF, TXT, and Markdown text extraction
 - Text chunking with metadata
+- Markdown-aware chunking with heading-path metadata
 - Local deterministic embedding placeholder
 - pgvector-backed semantic search
+- Lexical re-ranking for more precise RAG retrieval
 - Knowledge base list, upload, search, and chunk preview UI
 - Support ticket creation, filtering, detail, messages, status updates, and reply draft placeholder
 - LangGraph support agent workflow
 - Chat endpoint and dashboard chat UI
 - Knowledge-grounded answers with citations
+- Mock-mode answer generation when `OPENAI_API_KEY` is not configured
 - Structured agent step tracing
 - Tool-call preparation for ticket creation
 - Agent run, agent step, and tool call persistence

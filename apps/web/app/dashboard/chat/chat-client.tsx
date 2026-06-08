@@ -113,6 +113,9 @@ export function ChatClient() {
                   <Badge tone={turn.response.needs_human_review ? "amber" : "green"}>
                     {turn.response.needs_human_review ? "human review" : "auto-ready"}
                   </Badge>
+                  <Badge tone={turn.response.answer_mode === "mock" ? "amber" : "green"}>
+                    {turn.response.answer_mode}
+                  </Badge>
                   <Badge tone="blue">{turn.response.confidence}</Badge>
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
@@ -122,13 +125,16 @@ export function ChatClient() {
               </div>
               <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{turn.response.answer}</p>
 
-              <div className="mt-5 grid gap-4 xl:grid-cols-3">
+              <div className="mt-5 grid gap-4 xl:grid-cols-4">
                 <div className="rounded-md border border-border bg-background p-4">
                   <h3 className="text-sm font-semibold">Citations</h3>
                   <div className="mt-3 space-y-3">
                     {turn.response.citations.length ? turn.response.citations.map((citation) => (
                       <div key={citation.chunk_id} className="text-sm">
                         <p className="font-medium text-primary">{citation.document_title}</p>
+                        {citation.heading ? (
+                          <p className="mt-1 text-xs font-medium text-foreground">{citation.heading}</p>
+                        ) : null}
                         <p className="mt-1 line-clamp-4 text-xs leading-5 text-muted-foreground">{citation.quote}</p>
                       </div>
                     )) : (
@@ -140,13 +146,29 @@ export function ChatClient() {
                 <div className="rounded-md border border-border bg-background p-4">
                   <h3 className="text-sm font-semibold">Structured Steps</h3>
                   <ol className="mt-3 space-y-2">
-                    {turn.response.steps.map((step, index) => (
-                      <li key={`${step.title}-${index}`} className="text-sm">
-                        <span className="font-medium">{index + 1}. {step.title}</span>
-                        <p className="mt-1 text-xs text-muted-foreground">{step.detail}</p>
+                    {turn.response.structured_steps.map((step, index) => (
+                      <li key={`${step}-${index}`} className="text-sm">
+                        <span className="font-medium">{index + 1}. {step}</span>
                       </li>
                     ))}
                   </ol>
+                </div>
+
+                <div className="rounded-md border border-border bg-background p-4">
+                  <h3 className="text-sm font-semibold">Retrieved Chunks</h3>
+                  <div className="mt-3 space-y-3">
+                    {turn.response.retrieved_chunks.length ? turn.response.retrieved_chunks.map((chunk) => (
+                      <div key={chunk.chunk_id} className="text-xs text-muted-foreground">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="font-medium text-foreground">{chunk.heading || chunk.document_title}</span>
+                          <Badge tone="blue">{chunk.score.toFixed(3)}</Badge>
+                        </div>
+                        <p className="line-clamp-4 leading-5">{chunk.content}</p>
+                      </div>
+                    )) : (
+                      <p className="text-xs text-muted-foreground">No chunks retrieved.</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="rounded-md border border-border bg-background p-4">

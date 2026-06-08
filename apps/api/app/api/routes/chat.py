@@ -31,8 +31,12 @@ def chat_with_agent(workspace_id: UUID, request: ChatRequest, db: Session = Depe
         "citations": state.get("citations", []),
         "confidence": state.get("confidence", "low"),
         "needs_human_review": bool(state.get("approval_required")),
+        "answer_mode": state.get("answer_mode", "mock"),
         "agent_run_id": str(run.id),
-        "steps": state.get("structured_steps", []),
+        "structured_steps": [
+            f"{step['title']}：{step['detail']}" for step in state.get("structured_steps", [])
+        ],
+        "retrieved_chunks": state.get("retrieved_chunks", []),
         "tool_calls": [
             {
                 "tool_name": call.tool_name,
@@ -44,4 +48,3 @@ def chat_with_agent(workspace_id: UUID, request: ChatRequest, db: Session = Depe
         ],
         "latency_ms": run.latency_ms,
     }
-

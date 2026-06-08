@@ -6,7 +6,7 @@ from app.services.document_service import search_knowledge_base
 from app.services.ticket_service import create_ticket
 
 
-def knowledge_search(db: Session, workspace_id, query: str, top_k: int = 5) -> dict:
+def knowledge_search(db: Session, workspace_id, query: str, top_k: int = 3) -> dict:
     chunks = []
     for chunk, document_title, score in search_knowledge_base(db, workspace_id, query, top_k):
         chunks.append(
@@ -14,6 +14,8 @@ def knowledge_search(db: Session, workspace_id, query: str, top_k: int = 5) -> d
                 "chunk_id": str(chunk.id),
                 "document_id": str(chunk.document_id),
                 "document_title": document_title,
+                "heading": (chunk.metadata_ or {}).get("heading"),
+                "heading_path": (chunk.metadata_ or {}).get("heading_path", []),
                 "content": chunk.content,
                 "score": score,
             }
@@ -42,4 +44,3 @@ def create_support_ticket(
         ),
     )
     return {"ticket_id": str(ticket.id), "status": ticket.status.value}
-

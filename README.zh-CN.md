@@ -26,13 +26,16 @@ AgentDesk 是一个面向真实客服与运营场景的开源 AI 支持代理平
 - 知识库文档上传
 - PDF、TXT、Markdown 文本解析
 - 文本分块和元数据存储
+- Markdown-aware 分块，并在 chunk metadata 中保存 heading path
 - 本地确定性 embedding 占位实现
 - 基于 pgvector 的语义搜索
+- 结合关键词的检索重排，让 RAG 更精准命中相关章节
 - 知识库列表、上传、搜索和 chunk 预览 UI
 - 工单创建、筛选、详情、消息、状态更新和回复草稿
 - LangGraph 支持代理工作流
 - Chat API 和聊天工作台 UI
 - 带 citation 的知识库问答
+- 未配置 `OPENAI_API_KEY` 时明确使用 mock 模式生成 demo answer
 - 结构化 Agent Step 追踪
 - 工单创建工具调用准备
 - Agent Run、Agent Step、Tool Call 持久化
