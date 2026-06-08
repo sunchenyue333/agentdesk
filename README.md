@@ -1,8 +1,10 @@
 # AgentDesk
 
+[中文文档](README.zh-CN.md)
+
 AgentDesk is an open-source AI support agent platform for production-style customer support and operations workflows.
 
-AgentDesk demonstrates how to build a production-style AI agent system with RAG, tool calling, human-in-the-loop workflows, observability, and evaluation.
+AgentDesk demonstrates how to build a production-style AI agent system with RAG, tool calling, human-in-the-loop workflows, observability, and evaluation. It is designed as a portfolio-grade reference implementation for teams that want to understand how an AI customer support workspace can move beyond a simple chatbot into a governed operations product.
 
 ## Why This Exists
 
