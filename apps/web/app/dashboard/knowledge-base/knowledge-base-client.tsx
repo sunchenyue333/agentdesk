@@ -57,6 +57,7 @@ export function KnowledgeBaseClient() {
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!workspace || !selectedFile) {
       return;
     }
@@ -73,7 +74,7 @@ export function KnowledgeBaseClient() {
       await uploadDocument(workspace.id, formData);
       setSelectedFile(null);
       setTitle("");
-      event.currentTarget.reset();
+      form.reset();
       setDocuments(await getDocuments(workspace.id));
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Upload failed");

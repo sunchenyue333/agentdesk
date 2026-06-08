@@ -65,11 +65,12 @@ export function TicketsClient() {
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!workspace) {
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     setIsCreating(true);
     setError(null);
     try {
@@ -80,7 +81,7 @@ export function TicketsClient() {
         description: String(formData.get("description") ?? ""),
         priority: String(formData.get("priority") ?? "medium"),
       });
-      event.currentTarget.reset();
+      form.reset();
       await loadTickets();
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "Failed to create ticket");
